@@ -24,7 +24,7 @@ class _MyAppState extends State<MyApp> {
               children: <Widget>[
                 /// Tagged text only to be shown
                 HashTagText(
-                  text: "#Welcome to #hashtagable\n This is #ReadOnlyText",
+                  text: "#Welcome to #hashtagable_v3\n This is #ReadOnlyText",
                   basicStyle: TextStyle(fontSize: 22, color: Colors.black),
                   decoratedStyle: TextStyle(fontSize: 22, color: Colors.red),
                   textAlign: TextAlign.center,

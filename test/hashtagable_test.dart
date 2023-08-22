@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hashtagable/hashtagable.dart';
+import 'package:hashtagable_v3/hashtagable.dart';
 
 void main() {
   final decoratedColor = Colors.red;

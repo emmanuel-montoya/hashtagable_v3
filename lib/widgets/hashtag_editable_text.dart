@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:hashtagable/composer/composer.dart';
-import 'package:hashtagable/detector/detector.dart';
+import 'package:hashtagable_v3/composer/composer.dart';
+import 'package:hashtagable_v3/detector/detector.dart';
 
 /// Show decorated tagged text while user is inputting text.
 ///

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hashtagable/detector/detector.dart';
+import 'package:hashtagable_v3/detector/detector.dart';
 
 /// Add composing to hashtag decorated text.
 ///

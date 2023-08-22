@@ -1,5 +1,8 @@
 ## 2.1.0
 * Upgrade flutter version to 2.10.3
+* 
+## 2.1.0
+* Upgrade flutter version to 2.10.3
 
 ## 2.0.2
 * Fix errors occurred on flutter 2.2.x

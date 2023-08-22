@@ -1,4 +1,4 @@
-library hashtagable;
+library hashtagable_v3;
 
 export 'detector/detector.dart';
 export 'detector/hashtag_regular_expression.dart';

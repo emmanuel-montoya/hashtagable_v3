@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:hashtagable/hashtagable.dart';
+import 'package:hashtagable_v3/functions.dart';
 
 /// Show decorated tagged text only to be shown
 ///

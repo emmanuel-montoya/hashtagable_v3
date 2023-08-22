@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:hashtagable/widgets/hashtag_text.dart';
+import 'package:hashtagable_v3/widgets/hashtag_text.dart';
 
 import 'detector/detector.dart';
 
