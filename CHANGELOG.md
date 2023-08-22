@@ -1,6 +1,9 @@
-## 2.1.0
-* Upgrade flutter version to 2.10.3
-* 
+## 3.0.1
+* Updated to match the new Flutter 3.13 API
+
+## 3.0.0
+* Migrating from other source to Neom Github Repository
+
 ## 2.1.0
 * Upgrade flutter version to 2.10.3
 
