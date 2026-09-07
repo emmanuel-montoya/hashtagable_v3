@@ -1,3 +1,15 @@
+## 3.1.0
+* **New Feature:** Added `HashTagTextEditingController` allowing direct decoration inside standard `TextField`, `TextFormField`, and `CupertinoTextField`.
+* **New Feature:** Added support for Cashtags (`$BTC`, `$AAPL`) and custom prefix decorators via `decorateCashtag` and `customPrefixes`.
+* **New Functions:** Added `extractMentions`, `extractCashtags`, `hasMentions`, and `hasCashtags`.
+* **Flutter Modernization:**
+  * Deprecated `ToolbarOptions` in favor of `contextMenuBuilder` (Flutter 3.7+ standard).
+  * Added `TextScaler` support in `HashTagText` and `HashTagEditableText` (Flutter 3.16+ standard).
+  * Updated SDK constraints to Dart `>=3.4.0 <4.0.0` and Flutter `>=3.22.0`.
+  * Migrated to `WidgetStateProperty` and modern Material 3 states.
+* **Documentation:** Added comprehensive dartdoc comments and modern usage guides across the public API.
+* **Fixes:** Resolved all static analysis warnings and deprecated API usages (targeting 160/160 pub points).
+
 ## 3.0.1
 * Updated to match the new Flutter 3.13 API
 

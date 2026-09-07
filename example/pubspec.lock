@@ -59,21 +59,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  hashtagable:
-    dependency: "direct main"
-    description:
-      name: hashtagable
-      sha256: "6f35f1f320a9cbb9138ee22b25db8abeebee19d8aedc87f8c298956d4e27b2ed"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0+1"
   hashtagable_v3:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "3.0.1"
+    version: "3.1.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -201,4 +193,4 @@ packages:
     version: "15.3.0"
 sdks:
   dart: ">=3.10.0-0 <4.0.0"
-  flutter: ">=3.18.0-18.0.pre.54"
+  flutter: ">=3.22.0"

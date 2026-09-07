@@ -20,11 +20,29 @@ class Detection implements Comparable<Detection> {
 ///
 /// Return the list of [Detection] in [getDetections]
 class Detector {
+  /// The [TextStyle] applied to normal, untagged text.
   final TextStyle? textStyle;
+
+  /// The [TextStyle] applied to decorated hashtags and mentions.
   final TextStyle? decoratedStyle;
+
+  /// Whether to decorate words starting with '@' (mentions).
   final bool? decorateAtSign;
 
-  Detector({this.textStyle, this.decoratedStyle, this.decorateAtSign = false});
+  /// Whether to decorate words starting with '$' (cashtags for crypto/stocks).
+  final bool? decorateCashtag;
+
+  /// Optional list of custom prefix symbols to decorate (e.g. `['#', '@', '$']`).
+  final List<String>? customPrefixes;
+
+  /// Creates a [Detector] to identify and style tagged words.
+  Detector({
+    this.textStyle,
+    this.decoratedStyle,
+    this.decorateAtSign = false,
+    this.decorateCashtag = false,
+    this.customPrefixes,
+  });
 
   List<Detection> _getSourceDetections(
       List<RegExpMatch> tags, String copiedText) {
@@ -118,7 +136,18 @@ class Detector {
           emojiMatch.start, emojiMatch.end, replacementText);
     });
 
-    final regExp = decorateAtSign! ? hashTagAtSignRegExp : hashTagRegExp;
+    final RegExp regExp;
+    if (customPrefixes != null && customPrefixes!.isNotEmpty) {
+      regExp = createTagRegExp(customPrefixes!);
+    } else if (decorateCashtag == true && decorateAtSign == true) {
+      regExp = hashTagAtSignCashtagRegExp;
+    } else if (decorateCashtag == true) {
+      regExp = hashTagCashtagRegExp;
+    } else if (decorateAtSign == true) {
+      regExp = hashTagAtSignRegExp;
+    } else {
+      regExp = hashTagRegExp;
+    }
 
     final tags = regExp.allMatches(copiedText).toList();
     if (tags.isEmpty) {

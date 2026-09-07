@@ -343,7 +343,11 @@ class HashTagTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
+    @Deprecated('Use contextMenuBuilder instead.')
     ToolbarOptions? toolbarOptions,
+    this.contextMenuBuilder,
+    this.decorateCashtag = false,
+    this.customPrefixes,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -417,18 +421,7 @@ class HashTagTextField extends StatefulWidget {
             'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        toolbarOptions = toolbarOptions ??
-            (obscureText
-                ? const ToolbarOptions(
-                    selectAll: true,
-                    paste: true,
-                  )
-                : const ToolbarOptions(
-                    copy: true,
-                    cut: true,
-                    selectAll: true,
-                    paste: true,
-                  )),
+        toolbarOptions = toolbarOptions,
         super(key: key);
 
   final ValueChanged<String>? onDetectionTyped;
@@ -561,10 +554,18 @@ class HashTagTextField extends StatefulWidget {
 
   /// Configuration of toolbar options.
   ///
-  /// If not set, select all and paste will default to be enabled. Copy and cut
-  /// will be disabled if [obscureText] is true. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
+  /// Deprecated. Use [contextMenuBuilder] instead.
+  @Deprecated('Use contextMenuBuilder instead.')
+  final ToolbarOptions? toolbarOptions;
+
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  /// Whether to decorate words starting with '$' (cashtags).
+  final bool decorateCashtag;
+
+  /// Optional list of custom prefix symbols to decorate.
+  final List<String>? customPrefixes;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -735,15 +736,15 @@ class HashTagTextField extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.error].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.error].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.textable] will be used.
   ///
   /// The [mouseCursor] is the only property of [HashTagTextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
@@ -1286,8 +1287,11 @@ class _HashTagTextFieldState extends State<HashTagTextField>
           onDetectionFinished: widget.onDetectionFinished,
           onDetectionTyped: widget.onDetectionTyped,
           decorateAtSign: widget.decorateAtSign,
+          decorateCashtag: widget.decorateCashtag,
+          customPrefixes: widget.customPrefixes,
           readOnly: widget.readOnly || !_isEnabled,
           toolbarOptions: widget.toolbarOptions,
+          contextMenuBuilder: widget.contextMenuBuilder,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
@@ -1365,13 +1369,13 @@ class _HashTagTextFieldState extends State<HashTagTextField>
       );
     }
     final MouseCursor effectiveMouseCursor =
-        MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-      <MaterialState>{
-        if (!_isEnabled) MaterialState.disabled,
-        if (_isHovering) MaterialState.hovered,
-        if (focusNode.hasFocus) MaterialState.focused,
-        if (_hasError) MaterialState.error,
+        WidgetStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? WidgetStateMouseCursor.textable,
+      <WidgetState>{
+        if (!_isEnabled) WidgetState.disabled,
+        if (_isHovering) WidgetState.hovered,
+        if (focusNode.hasFocus) WidgetState.focused,
+        if (_hasError) WidgetState.error,
       },
     );
 

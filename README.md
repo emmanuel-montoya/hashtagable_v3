@@ -1,107 +1,173 @@
 
-# hashtagable_v3 
+# hashtagable_v3
 
-[![test](https://github.com/santa112358/hashtagable/workflows/test/badge.svg)](https://github.com/santa112358/hashtagable/actions?query=workflow%3Atest) [![pub package](https://img.shields.io/pub/v/hashtagable.svg)](https://pub.dev/packages/hashtagable)
+[![pub package](https://img.shields.io/pub/v/hashtagable_v3.svg)](https://pub.dev/packages/hashtagable_v3)
+[![pub points](https://img.shields.io/pub/points/hashtagable_v3)](https://pub.dev/packages/hashtagable_v3/score)
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License: MIT"></a>
 
-Widgets and functions to implement hashTag decorated text.
+Widgets, functions, and controllers to implement hashtag, mention, and cashtag decorated text in Flutter.
 
-Detects the words start with `#` like a Twitter.
+Detects words starting with `#` (hashtags), `@` (mentions), `$` (cashtags/crypto/stocks), or any custom prefixes of your choice like Twitter / X, Bluesky, Instagram, and Reddit.
 
-![RPReplay_Final1599932903](https://user-images.githubusercontent.com/43510799/93001716-1d981280-f56c-11ea-8700-f181f7850455.gif)
+![Demo](https://user-images.githubusercontent.com/43510799/93001716-1d981280-f56c-11ea-8700-f181f7850455.gif)
+
+---
+
+## What's New in v3.1.0 🚀
+
+- **`HashTagTextEditingController`**: A lightweight `TextEditingController` that brings instant tag decoration and typing callbacks to standard Flutter `TextField`, `TextFormField`, and `CupertinoTextField` without widget wrappers!
+- **Cashtag Support (`$`)**: Tag financial tickers and cryptocurrencies (e.g. `$BTC`, `$TSLA`, `$ETH`) using `decorateCashtag: true`.
+- **Custom Prefixes**: Highlight any custom symbols using `customPrefixes: ['#', '@', '$', '!']`.
+- **Modern Flutter & TextScaler**: Full support for Flutter 3.22+, `TextScaler`, and `WidgetStateProperty`.
+- **Extraction Utilities**: `hasMentions()`, `hasCashtags()`, `extractMentions()`, and `extractCashtags()`.
+
+---
+
+## Installation
+
+Add `hashtagable_v3` to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  hashtagable_v3: ^3.1.0
+```
+
+---
 
 ## Usage
 
-- **As TextField**
+### 1. Modern Controller (Recommended)
 
-You can use `HashTagTextField` to decorate input text.
+Use `HashTagTextEditingController` directly in any standard `TextField` or `TextFormField`:
+
 ```dart
-    HashTagTextField(
-    decoratedStyle: TextStyle(fontSize: 14, color: Colors.blue),
-    basicStyle: TextStyle(fontSize: 14, color: Colors.black),
+final controller = HashTagTextEditingController(
+  text: "Hello #flutter and @openneom with \$BTC!",
+  decoratedStyle: const TextStyle(
+    color: Colors.blue,
+    fontWeight: FontWeight.bold,
+  ),
+  basicStyle: const TextStyle(
+    color: Colors.black,
+  ),
+  decorateAtSign: true,
+  decorateCashtag: true,
+  onTagChanged: (tag) {
+    print("Currently typing tag: $tag");
+  },
+  onTagFinished: () {
+    print("Tag completed");
+  },
+);
+
+@override
+Widget build(BuildContext context) {
+  return TextFormField(
+    controller: controller,
+    decoration: const InputDecoration(
+      hintText: "What's happening? Use #tags, @mentions, or \$cashtags",
     ),
+  );
+}
 ```
-`decoratedStyle` is the textStyle of tagged text. `basicStyle` is for untagged text.
 
-Other arguments are basically same as those of material `TextField`
+### 2. ReadOnly Display Text
 
+If you want to display decorated text with clickable tags, use `HashTagText`:
 
-
-
-- **As ReadOnlyText**
-
-If you want to decorate the text only to display, `HashTagText` will help you.
 ```dart
-    HashTagText(
-        text: "#Welcome to #hashtagable \n This is #ReadOnlyText",
-        decoratedStyle: TextStyle(fontSize: 22,color:Colors.red),
-        basicStyle: TextStyle(fontSize: 22,color:Colors.black),
-        onTap: (text) {
-          print(text);
-        },
-    )
+HashTagText(
+  text: "#Welcome to #hashtagable with @openneom and \$BTC!",
+  decoratedStyle: const TextStyle(fontSize: 18, color: Colors.blue),
+  basicStyle: const TextStyle(fontSize: 18, color: Colors.black),
+  decorateAtSign: true,
+  decorateCashtag: true,
+  onTap: (tag) {
+    print("User tapped tag: $tag");
+  },
+)
 ```
 
-The argument `onTap(String)` is called when user tapped a hashTag. 
+### 3. As HashTagTextField (Legacy Component)
 
-You can add some actions in this callback with the tapped hashTag.
+You can also continue using the standalone `HashTagTextField`:
 
-
-<img src ="https://user-images.githubusercontent.com/43510799/93002100-33f39d80-f56f-11ea-9855-83f2c095a1c4.jpg" width = "265"/>
-
-
-
-
-
-## Customize with useful functions
-
-- Check if the text has hashTags
 ```dart
-   print(hasHashtags("Hello #World")); 
-   // true
-   
-   print(hasHashtags("Hello World"));
-   // false
-   
+HashTagTextField(
+  decoratedStyle: const TextStyle(fontSize: 14, color: Colors.blue),
+  basicStyle: const TextStyle(fontSize: 14, color: Colors.black),
+  decorateAtSign: true,
+  decorateCashtag: true,
+  onDetectionTyped: (tag) {
+    print("Typing: $tag");
+  },
+)
 ```
-- Extract hashTags from text
+
+---
+
+## Custom Symbols & Prefixes
+
+To decorate arbitrary symbols (for instance `#`, `@`, `$`, `!`, or `§`), pass `customPrefixes`:
+
 ```dart
-   final List<String> hashTags = extractHashTags("#Hello World #Flutter Dart #Thank you");
-   // ["#Hello", "#Flutter", "#Thank"]
-
+HashTagText(
+  text: "Highlight !important notice and ?query along with #topic",
+  customPrefixes: const ['!', '?', '#'],
+  decoratedStyle: const TextStyle(color: Colors.deepOrange),
+  basicStyle: const TextStyle(color: Colors.black),
+  onTap: (symbolTag) => print(symbolTag),
+)
 ```
 
+---
 
-## Tips
+## Useful Functions
 
-- [DetectableTextField](https://pub.dev/packages/detectable_text_field) is published as a refinement of this package. hashtagale forces you to use hashtag, but this one allows you to detect anything you want.
+### Detection & Extraction
 
-- If you also want to decorate At sign, you can do that by adding the argument `decorateAtSign: true`.
 ```dart
-    HashTagText(
-        text: "#Hello World @flutter_developers",
-        decoratedStyle: TextStyle(fontSize: 14,color:Colors.red),
-        basicStyle: TextStyle(fontSize: 14,color:Colors.black),
-        onTap: (text) {
-          print(text);
-        },
-        decorateAtSign: true,
-    )
+// Hashtags (#)
+hasHashTags("Hello #World"); // true
+extractHashTags("#Hello #Flutter Dart #ThankYou"); // ["#Hello", "#Flutter", "#ThankYou"]
+
+// Mentions (@)
+hasMentions("Ping @emmanuel and @openneom"); // true
+extractMentions("Ping @emmanuel and @openneom"); // ["@emmanuel", "@openneom"]
+
+// Cashtags ($)
+hasCashtags(r"Buy $BTC and $ETH"); // true
+extractCashtags(r"Buy $BTC and $ETH"); // ["$BTC", "$ETH"]
 ```
-Then `HashTagText` and `HashtagTextField` come to decorate the words start with `#` or `@`.
 
+### Rich Text Span Generation
 
-- The decoration rules are almost same as twitter. It does not decorate the tags which contain emoji or symbol.
-It needs space before `#` (or `@`) to decorate.
+Generate custom `TextSpan` trees anywhere in your UI:
 
-<img src ="https://user-images.githubusercontent.com/43510799/93002102-3655f780-f56f-11ea-8193-1753a69e23bc.jpg" width = "265"/>
+```dart
+final TextSpan span = getHashTagTextSpan(
+  decoratedStyle: const TextStyle(color: Colors.blue),
+  basicStyle: const TextStyle(color: Colors.black),
+  source: "Check out #hashtagable by @openneom!",
+  decorateAtSign: true,
+  onTap: (tag) => print(tag),
+);
+```
 
-- Supported Languages are English, Japanese, Korean, Spanish, Arabic, Thai, Norwegian and German.
+---
 
+## Supported Languages & Rules
 
-If you have any requests or questions, please feel free to ask on [github](https://github.com/santa112358/hashtagable/issues).
+- Supports English, Japanese, Korean, Spanish, Arabic, Thai, Norwegian, German, and more.
+- Respects punctuation and emojis: stops decoration when hitting emojis or special punctuation.
+- Requires whitespace (or start-of-line) before tag prefixes to avoid false positives in email addresses or URLs.
 
+---
 
-***
+## Contributors & Attribution
 
-Contributors: [Santa Takahashi](https://github.com/santa112358), [Matheus Perez](https://github.com/matheusperez), [Marcel Schneider](https://github.com/SchnMar), [Ho Kim](https://github.com/kerryeon), [Burak](https://github.com/buraktabn)
+- Maintained by [Emmanuel Montoya](https://github.com/emmanuel-montoya) / [OpenNeom](https://openneom.dev).
+- Original creator and contributors: [Santa Takahashi](https://github.com/santa112358), [Matheus Perez](https://github.com/matheusperez), [Marcel Schneider](https://github.com/SchnMar), [Ho Kim](https://github.com/kerryeon), [Burak](https://github.com/buraktabn).
+
+Issues & feature requests welcome at [github.com/emmanuel-montoya/hashtagable_v3](https://github.com/emmanuel-montoya/hashtagable_v3/issues).
+

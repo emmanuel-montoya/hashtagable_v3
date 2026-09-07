@@ -1,11 +1,12 @@
 name: hashtagable_v3
-description: Widgets and functions to implement hashtag decorated text. Decorates the words which start with `#` like a Twitter.
-version: 3.0.1
+description: Widgets, functions, and controllers to implement hashtag, mention, and cashtag decorated text in Flutter.
+version: 3.1.0
 homepage: https://pub.dev/packages/hashtagable_v3
 repository: https://github.com/emmanuel-montoya/hashtagable_v3
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
 
 dependencies:
   flutter:
@@ -14,7 +15,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^4.0.0
 
 # The following section is specific to Flutter.
 flutter:
+
 

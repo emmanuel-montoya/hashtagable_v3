@@ -45,3 +45,25 @@ final hashTagAtSignRegExp = RegExp(
   "(?!\\n)(?:^|\\s)([#@]([$hashTagContentLetters]+))",
   multiLine: true,
 );
+
+/// Regular expression when you select decorateCashtag ($)
+final hashTagCashtagRegExp = RegExp(
+  "(?!\\n)(?:^|\\s)([#\\\$]([$hashTagContentLetters]+))",
+  multiLine: true,
+);
+
+/// Regular expression when you select decorateAtSign and decorateCashtag ($)
+final hashTagAtSignCashtagRegExp = RegExp(
+  "(?!\\n)(?:^|\\s)([#@\\\$]([$hashTagContentLetters]+))",
+  multiLine: true,
+);
+
+/// Creates a custom [RegExp] for arbitrary tag prefix symbols (e.g. ['#', '@', '$'])
+RegExp createTagRegExp(List<String> prefixes) {
+  final escaped = prefixes.map(RegExp.escape).join();
+  return RegExp(
+    "(?!\\n)(?:^|\\s)([$escaped]([$hashTagContentLetters]+))",
+    multiLine: true,
+  );
+}
+

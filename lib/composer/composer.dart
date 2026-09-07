@@ -3,8 +3,9 @@ import 'package:hashtagable_v3/detector/detector.dart';
 
 /// Add composing to hashtag decorated text.
 ///
-/// Expected to be used when Japanese letters are typed.
+/// Expected to be used when Japanese or IME letters are typed.
 class Composer {
+  /// Creates a [Composer] instance to handle composing text and hashtag detections.
   Composer({
     required this.sourceText,
     required this.detections,
@@ -14,14 +15,25 @@ class Composer {
     required this.onDetectionTyped,
   });
 
+  /// The original full text being composed.
   final String sourceText;
+
+  /// The list of detected hashtag ranges and styles.
   final List<Detection?> detections;
+
+  /// The active composing range (underlined text during IME input).
   final TextRange composing;
+
+  /// The current cursor selection position.
   final int selection;
+
+  /// The text style applied to decorated hashtags.
   final TextStyle decoratedStyle;
+
+  /// Callback invoked when a hashtag or mention is typed.
   final ValueChanged<String>? onDetectionTyped;
 
-  // TODO(Takahashi): Add test code for composing
+  /// Builds a [TextSpan] that handles both hashtag styling and IME composing underline.
   TextSpan getComposedTextSpan() {
     final span = detections.map(
       (item) {
@@ -84,6 +96,7 @@ class Composer {
     return TextSpan(children: span);
   }
 
+  /// Returns the current [Detection] being typed by the user based on cursor position.
   Detection? typingDetection() {
     final res = detections.where(
       (detection) =>
@@ -98,6 +111,7 @@ class Composer {
     }
   }
 
+  /// Invokes [onDetectionTyped] with the text currently being typed within a hashtag.
   void callOnDetectionTyped() {
     final typingRange = typingDetection()?.range;
     if (typingRange != null) {

@@ -6,10 +6,10 @@ import 'detector/detector.dart';
 
 /// Check if the text has hashTags
 bool hasHashTags(String value) {
-  final decoratedTextColor = Colors.blue;
+  const decoratedTextColor = Colors.blue;
   final detector = Detector(
-      textStyle: TextStyle(),
-      decoratedStyle: TextStyle(color: decoratedTextColor));
+      textStyle: const TextStyle(),
+      decoratedStyle: const TextStyle(color: decoratedTextColor));
   final result = detector.getDetections(value);
   final detections = result
       .where((detection) => detection.style!.color == decoratedTextColor)
@@ -17,12 +17,44 @@ bool hasHashTags(String value) {
   return detections.isNotEmpty;
 }
 
+/// Check if the text has mentions (@)
+bool hasMentions(String value) {
+  const decoratedTextColor = Colors.purple;
+  final detector = Detector(
+      textStyle: const TextStyle(),
+      decoratedStyle: const TextStyle(color: decoratedTextColor),
+      decorateAtSign: true);
+  final result = detector.getDetections(value);
+  final detections = result.where((d) {
+    if (d.style!.color != decoratedTextColor) return false;
+    final txt = d.range.textInside(value).trim();
+    return txt.startsWith('@');
+  }).toList();
+  return detections.isNotEmpty;
+}
+
+/// Check if the text has cashtags ($)
+bool hasCashtags(String value) {
+  const decoratedTextColor = Colors.green;
+  final detector = Detector(
+      textStyle: const TextStyle(),
+      decoratedStyle: const TextStyle(color: decoratedTextColor),
+      decorateCashtag: true);
+  final result = detector.getDetections(value);
+  final detections = result.where((d) {
+    if (d.style!.color != decoratedTextColor) return false;
+    final txt = d.range.textInside(value).trim();
+    return txt.startsWith(r'$');
+  }).toList();
+  return detections.isNotEmpty;
+}
+
 /// Extract hashTags from the text
 List<String> extractHashTags(String value) {
-  final decoratedTextColor = Colors.blue;
+  const decoratedTextColor = Colors.blue;
   final detector = Detector(
-      textStyle: TextStyle(),
-      decoratedStyle: TextStyle(color: decoratedTextColor));
+      textStyle: const TextStyle(),
+      decoratedStyle: const TextStyle(color: decoratedTextColor));
   final detections = detector.getDetections(value);
   final taggedDetections = detections
       .where((detection) => detection.style!.color == decoratedTextColor)
@@ -31,6 +63,42 @@ List<String> extractHashTags(String value) {
     final text = decoration.range.textInside(value);
     return text.trim();
   }).toList();
+  return result;
+}
+
+/// Extract mentions (@username) from the text
+List<String> extractMentions(String value) {
+  const decoratedTextColor = Colors.purple;
+  final detector = Detector(
+      textStyle: const TextStyle(),
+      decoratedStyle: const TextStyle(color: decoratedTextColor),
+      decorateAtSign: true);
+  final detections = detector.getDetections(value);
+  final taggedDetections = detections
+      .where((detection) => detection.style!.color == decoratedTextColor)
+      .toList();
+  final result = taggedDetections
+      .map((decoration) => decoration.range.textInside(value).trim())
+      .where((text) => text.startsWith('@'))
+      .toList();
+  return result;
+}
+
+/// Extract cashtags ($SYMBOL) from the text
+List<String> extractCashtags(String value) {
+  const decoratedTextColor = Colors.green;
+  final detector = Detector(
+      textStyle: const TextStyle(),
+      decoratedStyle: const TextStyle(color: decoratedTextColor),
+      decorateCashtag: true);
+  final detections = detector.getDetections(value);
+  final taggedDetections = detections
+      .where((detection) => detection.style!.color == decoratedTextColor)
+      .toList();
+  final result = taggedDetections
+      .map((decoration) => decoration.range.textInside(value).trim())
+      .where((text) => text.startsWith(r'$'))
+      .toList();
   return result;
 }
 
@@ -43,11 +111,15 @@ TextSpan getHashTagTextSpan({
   required String source,
   Function(String)? onTap,
   bool decorateAtSign = false,
+  bool decorateCashtag = false,
+  List<String>? customPrefixes,
 }) {
   final decorations = Detector(
           decoratedStyle: decoratedStyle,
           textStyle: basicStyle,
-          decorateAtSign: decorateAtSign)
+          decorateAtSign: decorateAtSign,
+          decorateCashtag: decorateCashtag,
+          customPrefixes: customPrefixes)
       .getDetections(source);
   if (decorations.isEmpty) {
     return TextSpan(text: source, style: basicStyle);

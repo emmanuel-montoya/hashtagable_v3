@@ -131,4 +131,61 @@ void main() {
     final source = "The space right before the hashtag is　#fullWidth";
     expect(hasHashTags(source), true);
   });
+
+  test("detect and extract mentions (@)", () {
+    final source = "Hello @emmanuel and @openneom welcome!";
+    expect(hasMentions(source), true);
+    final mentions = extractMentions(source);
+    expect(mentions.length, 2);
+    expect(mentions[0], "@emmanuel");
+    expect(mentions[1], "@openneom");
+  });
+
+  test(r"detect and extract cashtags ($)", () {
+    final source = r"Buy $BTC and $ETH today!";
+    expect(hasCashtags(source), true);
+    final cashtags = extractCashtags(source);
+    expect(cashtags.length, 2);
+    expect(cashtags[0], r"$BTC");
+    expect(cashtags[1], r"$ETH");
+  });
+
+  test("custom prefixes detection", () {
+    final customDetector = Detector(
+      textStyle: const TextStyle(color: Colors.black),
+      decoratedStyle: const TextStyle(color: Colors.red),
+      customPrefixes: ['#', '@', r'$'],
+    );
+    final source = r"Check #flutter with @user and $SOL";
+    final detections = customDetector.getDetections(source);
+    final tagged = detections.where((d) => d.style!.color == Colors.red).toList();
+    expect(tagged.length, 3);
+  });
+
+  testWidgets("HashTagTextEditingController builds styled spans in TextField",
+      (tester) async {
+    final controller = HashTagTextEditingController(
+      text: "Hello #flutter and @openneom",
+      decoratedStyle: const TextStyle(color: Colors.blue),
+      basicStyle: const TextStyle(color: Colors.black),
+      decorateAtSign: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    final span = controller.buildTextSpan(
+      context: tester.element(find.byType(TextField)),
+      withComposing: false,
+    );
+
+    expect(span.children, isNotNull);
+    expect(span.children!.length, greaterThan(1));
+  });
 }
+

@@ -31,12 +31,9 @@ class HashTagEditableText extends EditableText {
     bool obscureText = false,
     bool readOnly = false,
     bool forceLine = true,
-    ToolbarOptions toolbarOptions = const ToolbarOptions(
-      copy: true,
-      cut: true,
-      paste: true,
-      selectAll: true,
-    ),
+    @Deprecated('Use contextMenuBuilder instead.')
+    ToolbarOptions? toolbarOptions,
+    EditableTextContextMenuBuilder? contextMenuBuilder,
     bool autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -46,7 +43,9 @@ class HashTagEditableText extends EditableText {
     TextDirection? textDirection,
     TextCapitalization textCapitalization = TextCapitalization.none,
     Locale? locale,
+    @Deprecated('Use textScaler instead.')
     double? textScaleFactor,
+    TextScaler? textScaler,
     bool expands = false,
     Color? selectionColor,
     TextSelectionControls? selectionControls,
@@ -79,6 +78,8 @@ class HashTagEditableText extends EditableText {
     Iterable<String>? autofillHints,
     String? restorationId,
     double? cursorHeight,
+    this.decorateCashtag = false,
+    this.customPrefixes,
   }) : super(
           key: key,
           focusNode: (focusNode) ?? FocusNode(),
@@ -94,8 +95,9 @@ class HashTagEditableText extends EditableText {
           minLines: minLines,
           obscureText: obscureText,
           readOnly: readOnly,
-          forceLine: forceLine,
+          // ignore: deprecated_member_use
           toolbarOptions: toolbarOptions,
+          contextMenuBuilder: contextMenuBuilder,
           autocorrect: autocorrect,
           smartDashesType: smartDashesType,
           smartQuotesType: smartQuotesType,
@@ -105,7 +107,10 @@ class HashTagEditableText extends EditableText {
           textDirection: textDirection,
           textCapitalization: textCapitalization,
           locale: locale,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler ??
+              (textScaleFactor != null
+                  ? TextScaler.linear(textScaleFactor)
+                  : null),
           expands: expands,
           selectionColor: selectionColor,
           selectionControls: selectionControls,
@@ -147,6 +152,10 @@ class HashTagEditableText extends EditableText {
 
   final bool decorateAtSign;
 
+  final bool decorateCashtag;
+
+  final List<String>? customPrefixes;
+
   @override
   HashTagEditableTextState createState() => HashTagEditableTextState();
 }
@@ -166,9 +175,12 @@ class HashTagEditableTextState extends EditableTextState {
   void initState() {
     super.initState();
     detector = Detector(
-        textStyle: widget.style,
-        decoratedStyle: widget.decoratedStyle,
-        decorateAtSign: widget.decorateAtSign);
+      textStyle: widget.style,
+      decoratedStyle: widget.decoratedStyle,
+      decorateAtSign: widget.decorateAtSign,
+      decorateCashtag: widget.decorateCashtag,
+      customPrefixes: widget.customPrefixes,
+    );
     widget.controller.addListener(() {
       _onValueUpdated.call();
     });
