@@ -115,7 +115,7 @@ class Composer {
   void callOnDetectionTyped() {
     final typingRange = typingDetection()?.range;
     if (typingRange != null) {
-      onDetectionTyped!(typingRange.textInside(sourceText));
+      onDetectionTyped?.call(typingRange.textInside(sourceText));
     }
   }
 }

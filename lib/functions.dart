@@ -12,7 +12,7 @@ bool hasHashTags(String value) {
       decoratedStyle: const TextStyle(color: decoratedTextColor));
   final result = detector.getDetections(value);
   final detections = result
-      .where((detection) => detection.style!.color == decoratedTextColor)
+      .where((detection) => detection.style?.color == decoratedTextColor)
       .toList();
   return detections.isNotEmpty;
 }
@@ -26,7 +26,7 @@ bool hasMentions(String value) {
       decorateAtSign: true);
   final result = detector.getDetections(value);
   final detections = result.where((d) {
-    if (d.style!.color != decoratedTextColor) return false;
+    if (d.style?.color != decoratedTextColor) return false;
     final txt = d.range.textInside(value).trim();
     return txt.startsWith('@');
   }).toList();
@@ -42,7 +42,7 @@ bool hasCashtags(String value) {
       decorateCashtag: true);
   final result = detector.getDetections(value);
   final detections = result.where((d) {
-    if (d.style!.color != decoratedTextColor) return false;
+    if (d.style?.color != decoratedTextColor) return false;
     final txt = d.range.textInside(value).trim();
     return txt.startsWith(r'$');
   }).toList();
@@ -57,7 +57,7 @@ List<String> extractHashTags(String value) {
       decoratedStyle: const TextStyle(color: decoratedTextColor));
   final detections = detector.getDetections(value);
   final taggedDetections = detections
-      .where((detection) => detection.style!.color == decoratedTextColor)
+      .where((detection) => detection.style?.color == decoratedTextColor)
       .toList();
   final result = taggedDetections.map((decoration) {
     final text = decoration.range.textInside(value);
@@ -75,7 +75,7 @@ List<String> extractMentions(String value) {
       decorateAtSign: true);
   final detections = detector.getDetections(value);
   final taggedDetections = detections
-      .where((detection) => detection.style!.color == decoratedTextColor)
+      .where((detection) => detection.style?.color == decoratedTextColor)
       .toList();
   final result = taggedDetections
       .map((decoration) => decoration.range.textInside(value).trim())
@@ -93,7 +93,7 @@ List<String> extractCashtags(String value) {
       decorateCashtag: true);
   final detections = detector.getDetections(value);
   final taggedDetections = detections
-      .where((detection) => detection.style!.color == decoratedTextColor)
+      .where((detection) => detection.style?.color == decoratedTextColor)
       .toList();
   final result = taggedDetections
       .map((decoration) => decoration.range.textInside(value).trim())
@@ -114,34 +114,47 @@ TextSpan getHashTagTextSpan({
   bool decorateCashtag = false,
   List<String>? customPrefixes,
 }) {
+  final boundedSource = source.length > Detector.maxInputLength
+      ? source.substring(
+          0,
+          (source.codeUnitAt(Detector.maxInputLength - 1) >= 0xD800 &&
+                  source.codeUnitAt(Detector.maxInputLength - 1) <= 0xDBFF)
+              ? Detector.maxInputLength - 1
+              : Detector.maxInputLength,
+        )
+      : source;
   final decorations = Detector(
           decoratedStyle: decoratedStyle,
           textStyle: basicStyle,
           decorateAtSign: decorateAtSign,
           decorateCashtag: decorateCashtag,
           customPrefixes: customPrefixes)
-      .getDetections(source);
+      .getDetections(boundedSource);
   if (decorations.isEmpty) {
-    return TextSpan(text: source, style: basicStyle);
+    return TextSpan(text: boundedSource, style: basicStyle);
   } else {
     decorations.sort();
     final span = decorations
         .asMap()
         .map(
           (index, item) {
-            final recognizer = TapGestureRecognizer()
-              ..onTap = () {
-                final decoration = decorations[index];
-                if (decoration.style == decoratedStyle) {
-                  onTap!(decoration.range.textInside(source).trim());
-                }
-              };
+            final isTagged = item.style == decoratedStyle;
+            final TapGestureRecognizer? recognizer =
+                (onTap != null && isTagged)
+                    ? (TapGestureRecognizer()
+                      ..onTap = () {
+                        final decoration = decorations[index];
+                        if (decoration.style == decoratedStyle) {
+                          onTap(decoration.range.textInside(boundedSource).trim());
+                        }
+                      })
+                    : null;
             return MapEntry(
               index,
               TextSpan(
                 style: item.style,
-                text: item.range.textInside(source),
-                recognizer: (onTap == null) ? null : recognizer,
+                text: item.range.textInside(boundedSource),
+                recognizer: recognizer,
               ),
             );
           },

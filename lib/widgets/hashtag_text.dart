@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hashtagable_v3/functions.dart';
 
 /// Show decorated tagged text only to be shown
@@ -6,7 +7,7 @@ import 'package:hashtagable_v3/functions.dart';
 /// [decoratedStyle] is textStyle of tagged text.
 /// [basicStyle] is textStyle of others.
 /// [onTap] is called when a tagged text is tapped.
-class HashTagText extends StatelessWidget {
+class HashTagText extends StatefulWidget {
   /// Creates a [HashTagText] widget.
   HashTagText({
     Key? key,
@@ -86,27 +87,79 @@ class HashTagText extends StatelessWidget {
   final List<String>? customPrefixes;
 
   @override
+  State<HashTagText> createState() => _HashTagTextState();
+}
+
+class _HashTagTextState extends State<HashTagText> {
+  late TextSpan _textSpan;
+
+  @override
+  void initState() {
+    super.initState();
+    _textSpan = _buildSpan();
+  }
+
+  @override
+  void didUpdateWidget(covariant HashTagText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text ||
+        oldWidget.basicStyle != widget.basicStyle ||
+        oldWidget.decoratedStyle != widget.decoratedStyle ||
+        oldWidget.decorateAtSign != widget.decorateAtSign ||
+        oldWidget.decorateCashtag != widget.decorateCashtag ||
+        !listEquals(oldWidget.customPrefixes, widget.customPrefixes) ||
+        oldWidget.onTap != widget.onTap) {
+      _disposeRecognizers(_textSpan);
+      _textSpan = _buildSpan();
+    }
+  }
+
+  TextSpan _buildSpan() {
+    return getHashTagTextSpan(
+      decoratedStyle: widget.decoratedStyle,
+      decorateAtSign: widget.decorateAtSign,
+      decorateCashtag: widget.decorateCashtag,
+      customPrefixes: widget.customPrefixes,
+      basicStyle: widget.basicStyle,
+      onTap: widget.onTap,
+      source: widget.text,
+    );
+  }
+
+  void _disposeRecognizers(InlineSpan span) {
+    if (span is TextSpan) {
+      span.recognizer?.dispose();
+      final children = span.children;
+      if (children != null) {
+        for (final child in children) {
+          _disposeRecognizers(child);
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers(_textSpan);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use_from_same_package
+    final effectiveScaler = widget.textScaler ?? TextScaler.linear(widget.textScaleFactor);
     return RichText(
-      text: getHashTagTextSpan(
-        decoratedStyle: decoratedStyle,
-        decorateAtSign: decorateAtSign,
-        decorateCashtag: decorateCashtag,
-        customPrefixes: customPrefixes,
-        basicStyle: basicStyle,
-        onTap: onTap,
-        source: text,
-      ),
-      textAlign: textAlign,
-      textDirection: textDirection,
-      softWrap: softWrap,
-      overflow: overflow,
-      textScaler: textScaler ?? TextScaler.linear(textScaleFactor),
-      maxLines: maxLines,
-      locale: locale,
-      strutStyle: strutStyle,
-      textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
+      text: _textSpan,
+      textAlign: widget.textAlign,
+      textDirection: widget.textDirection,
+      softWrap: widget.softWrap,
+      overflow: widget.overflow,
+      textScaler: effectiveScaler,
+      maxLines: widget.maxLines,
+      locale: widget.locale,
+      strutStyle: widget.strutStyle,
+      textWidthBasis: widget.textWidthBasis,
+      textHeightBehavior: widget.textHeightBehavior,
     );
   }
 }

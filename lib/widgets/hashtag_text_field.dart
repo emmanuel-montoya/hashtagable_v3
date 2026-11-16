@@ -92,6 +92,7 @@ class _TextFieldSelectionGestureDetectorBuilder
         case TargetPlatform.macOS:
           switch (details.kind) {
             case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
               // Precise devices should place the cursor at a precise position.
@@ -102,9 +103,6 @@ class _TextFieldSelectionGestureDetectorBuilder
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.trackpad:
-              // TODO: Handle this case.
               break;
           }
           break;
@@ -231,7 +229,7 @@ class _TextFieldSelectionGestureDetectorBuilder
 ///                 content: Text ('You typed "$value", which has length ${value.characters.length}.'),
 ///                 actions: <Widget>[
 ///                   TextButton(
-///                     onPressed: () { Navigator.pop(context); },
+///                     onPressed: () { Sint.pop(); },
 ///                     child: const Text('OK'),
 ///                   ),
 ///                 ],

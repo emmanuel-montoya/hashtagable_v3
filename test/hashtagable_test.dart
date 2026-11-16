@@ -187,5 +187,46 @@ void main() {
     expect(span.children, isNotNull);
     expect(span.children!.length, greaterThan(1));
   });
+
+  test("Lote 76: createTagRegExp escapes ']', '-', '^', '\\' and getHashTagTextSpan avoids leaked recognizers", () {
+    final trickyDetector = Detector(
+      textStyle: const TextStyle(color: Colors.black),
+      decoratedStyle: const TextStyle(color: Colors.red),
+      customPrefixes: [']', '-', '^', r'\', '#'],
+    );
+    final detections = trickyDetector.getDetections(r']uno -dos ^tres \cuatro #cinco texto');
+    final tagged = detections.where((d) => d.style?.color == Colors.red).toList();
+    expect(tagged.length, 5);
+
+    // Large emoji + hashtag payload runs in linear time without splitting surrogate pairs
+    final heavyEmoji = '${'🔥🎉🚀' * 600} #itzli ${'🎶✨' * 600}';
+    expect(extractHashTags(heavyEmoji), ['#itzli']);
+
+    // When onTap is null, zero TapGestureRecognizers are allocated; when onTap is set, ONLY tagged spans get recognizers
+    final noTapSpan = getHashTagTextSpan(
+      decoratedStyle: const TextStyle(color: Colors.red),
+      basicStyle: const TextStyle(color: Colors.black),
+      source: 'hola #mundo libre',
+      onTap: null,
+    );
+    expect(
+      noTapSpan.children!.whereType<TextSpan>().every((s) => s.recognizer == null),
+      isTrue,
+    );
+
+    final withTapSpan = getHashTagTextSpan(
+      decoratedStyle: const TextStyle(color: Colors.red),
+      basicStyle: const TextStyle(color: Colors.black),
+      source: 'hola #mundo libre',
+      onTap: (_) {},
+    );
+    final childSpans = withTapSpan.children!.whereType<TextSpan>().toList();
+    expect(childSpans[0].recognizer, isNull); // 'hola '
+    expect(childSpans[1].recognizer, isNotNull); // '#mundo'
+    expect(childSpans[2].recognizer, isNull); // ' libre'
+    for (final s in childSpans) {
+      s.recognizer?.dispose();
+    }
+  });
 }
 

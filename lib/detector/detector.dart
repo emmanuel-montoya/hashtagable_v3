@@ -78,15 +78,24 @@ class Detector {
     return result;
   }
 
+  static const int maxInputLength = 65536;
+  static final RegExp _fullWidthRegExp = RegExp(
+    r'(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])',
+  );
+  static final RegExp _tokenRegExp = RegExp(
+    r'[・ぁ-んーァ-ヶ一-龥\u1100-\u11FF\uAC00-\uD7A3０-９ａ-ｚＡ-Ｚ　]',
+  );
+
   ///Decorate tagged content, filter out the ones includes emoji.
   List<Detection> _getEmojiFilteredDetections(
       {required List<Detection> source,
       String? copiedText,
       List<RegExpMatch>? emojiMatches}) {
+    final matches = emojiMatches ?? const <RegExpMatch>[];
     final result = <Detection>[];
     for (var item in source) {
       int? emojiStartPoint;
-      for (var emojiMatch in emojiMatches!) {
+      for (var emojiMatch in matches) {
         final detectionContainsEmoji = (item.range.start < emojiMatch.start &&
             emojiMatch.end <= item.range.end);
         if (detectionContainsEmoji) {
@@ -113,28 +122,44 @@ class Detector {
     return result;
   }
 
+  static String _truncateUtf16Safe(String input, int maxChars) {
+    if (input.length <= maxChars) return input;
+    var end = maxChars;
+    final lastCode = input.codeUnitAt(end - 1);
+    if (lastCode >= 0xD800 && lastCode <= 0xDBFF) end--;
+    return end <= 0 ? '' : input.substring(0, end);
+  }
+
   /// Return the list of decorations with tagged and untagged text
   List<Detection> getDetections(String copiedText) {
-    /// Text to change emoji into replacement text
-    final fullWidthRegExp = RegExp(
-        r'(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])');
+    if (copiedText.isEmpty) return [];
+    final boundedInput = _truncateUtf16Safe(copiedText, maxInputLength);
 
-    final fullWidthRegExpMatches =
-        fullWidthRegExp.allMatches(copiedText).toList();
-    final tokenRegExp =
-        RegExp(r'[・ぁ-んーァ-ヶ一-龥\u1100-\u11FF\uAC00-\uD7A3０-９ａ-ｚＡ-Ｚ　]');
-    final emojiMatches = fullWidthRegExpMatches
-        .where((match) => (!tokenRegExp
-            .hasMatch(copiedText.substring(match.start, match.end))))
+    /// Text to change emoji into replacement text in a single O(N) pass.
+    final emojiMatches = _fullWidthRegExp
+        .allMatches(boundedInput)
+        .where((match) =>
+            !_tokenRegExp.hasMatch(boundedInput.substring(match.start, match.end)))
         .toList();
 
-    /// This is to avoid the error caused by 'regExp' which counts the emoji's length 1.
-    emojiMatches.forEach((emojiMatch) {
-      final emojiLength = emojiMatch.group(0)!.length;
-      final replacementText = "a" * emojiLength;
-      copiedText = copiedText.replaceRange(
-          emojiMatch.start, emojiMatch.end, replacementText);
-    });
+    if (emojiMatches.isEmpty) {
+      copiedText = boundedInput;
+    } else {
+      final masked = StringBuffer();
+      var cursor = 0;
+      for (final emojiMatch in emojiMatches) {
+        if (emojiMatch.start > cursor) {
+          masked.write(boundedInput.substring(cursor, emojiMatch.start));
+        }
+        final emojiLength = emojiMatch.end - emojiMatch.start;
+        masked.write('a' * emojiLength);
+        cursor = emojiMatch.end;
+      }
+      if (cursor < boundedInput.length) {
+        masked.write(boundedInput.substring(cursor));
+      }
+      copiedText = masked.toString();
+    }
 
     final RegExp regExp;
     if (customPrefixes != null && customPrefixes!.isNotEmpty) {

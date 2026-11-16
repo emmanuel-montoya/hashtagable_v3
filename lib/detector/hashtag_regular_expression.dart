@@ -60,9 +60,27 @@ final hashTagAtSignCashtagRegExp = RegExp(
 
 /// Creates a custom [RegExp] for arbitrary tag prefix symbols (e.g. ['#', '@', '$'])
 RegExp createTagRegExp(List<String> prefixes) {
-  final escaped = prefixes.map(RegExp.escape).join();
+  final classChars = StringBuffer();
+  for (final prefix in prefixes) {
+    final trimmed = prefix.trim();
+    if (trimmed.isEmpty) continue;
+    for (var i = 0; i < trimmed.length; i++) {
+      final ch = trimmed[i];
+      final code = ch.codeUnitAt(0);
+      if (code <= 0x20 || (code >= 0x7F && code <= 0x9F)) continue;
+      if (ch == r'\' || ch == ']' || ch == '-' || ch == '^') {
+        classChars.write(r'\');
+        classChars.write(ch);
+      } else {
+        classChars.write(RegExp.escape(ch));
+      }
+    }
+  }
+  if (classChars.isEmpty) {
+    return hashTagRegExp;
+  }
   return RegExp(
-    "(?!\\n)(?:^|\\s)([$escaped]([$hashTagContentLetters]+))",
+    "(?!\\n)(?:^|\\s)([${classChars.toString()}]([$hashTagContentLetters]+))",
     multiLine: true,
   );
 }

@@ -79,7 +79,9 @@ class HashTagTextEditingController extends TextEditingController {
     final currentTag = currentDetection?.range.textInside(text);
 
     if (currentTag != _lastTag) {
-      if (_lastTag != null && currentTag == null) {
+      if (currentTag != null) {
+        composer.callOnDetectionTyped();
+      } else if (_lastTag != null) {
         onTagFinished?.call();
       }
       _lastTag = currentTag;
